@@ -29,8 +29,8 @@
         image_mov.src = "img/man2.png";
 
 
-        let isRepeating=false//通常fpsの途中だとキーは受け付けない、リピートが速すぎるので10fpsに一回しか反応しないようにしている。たがそれだと最初のキー入力が微妙に遅れる感じがある
-        // このフラグがfalseならキーに反応するようにした、一度反応したらtrueで、キーをアップしたらfalseにもどる
+        let isRepeating=false//リピートが速すぎるので10fpsに一回しか反応しないようにしている。たがそれだと最初のキー入力が微妙に遅れる感じがある
+        // このフラグがfalseならいつでもキーに反応するようにした。一度反応したらtrueで、キーをアップしたらfalseにもどる
         let movingLeft=false
         let movingRight=false
         let movingup=false
@@ -265,8 +265,6 @@
             constructor(x, y, size, image) {
                 this.x = x;
                 this.y = y;
-                this.x2=Math.floor(x/50)
-                this.y2=Math.floor(y/50)                 
                 this.size=size
                 this.image=image
                 this.fps=0
@@ -279,7 +277,7 @@
                 );
             }
 
-            bugCheck(x,y,Bs){
+            bugCheck(x,y,Bs){//虫がいるかのチェック　３次受け
                 for (let B of Bs){
                     if (B.bx==x && B.by==y)
                         return true
@@ -287,7 +285,7 @@
                 return false
             }
 
-            stoneCheck(x,y,Ss){
+            stoneCheck(x,y,Ss){//石があるかのチェック　３次受け
                 for (let S of Ss){
                     if (S.x==x && S.y==y)
                         return S.id
@@ -295,8 +293,7 @@
                 return -1
             }
 
-
-            move(dx,dy){
+            move(dx,dy){//上下左右への移動（updateの２次受け
                 let x1f=this.x+dx//1step先
                 let y1f=this.y+dy
                 let x2f=this.x+(dx*2)//2step先
@@ -313,6 +310,7 @@
                 if (stoneId >= 0){//石か
                     //枠外か
                     if (x2f<0 || x2f >= 800 || y2f<0 || y2f >=600)return
+
                     //野か
                     let x2m=Math.floor(x2f/50)
                     let y2m=Math.floor(y2f/50)
@@ -344,7 +342,7 @@
                     this.y=y1f;
                 }
             }//move
-    
+   
 
             update(Ss,M1,Bs){  
               this.fps+=1;
@@ -366,44 +364,29 @@
             }//update  
           }//class
 
-    class Back{
-        constructor(image2,image3,image4,image5){    
-            this.image2=image2
-            this.image3=image3
-            this.image4=image4
-            this.image5=image5
+    class Back{//背景描画のため
+        constructor(Images){    
+            this.Images=Images
         }
         draw=()=>{    
           for(let i=0;i<12;i++){
-              for(let u=0;u<16;u++){
-                if(map[i][u]==1){//野
-                    ctx.drawImage(
-                        this.image2,
-                        0, 0, 50, 50, // 切り取る部分の (sx, sy, sw, sh)
-                        u*50, i*50,50, 50 // 描画する位置とサイズ (dx, dy, dw, dh)
-                    );
-                };
-                if(map[i][u]==2){//海
-                    ctx.drawImage(
-                        this.image3,
-                        0, 0, 50, 50, // 切り取る部分の (sx, sy, sw, sh)
-                        u*50, i*50,50, 50 // 描画する位置とサイズ (dx, dy, dw, dh)
-                    );
-                };
-                if(map[i][u]==3){//山
-                    ctx.drawImage(
-                        this.image5,
-                        0, 0, 50, 50, // 切り取る部分の (sx, sy, sw, sh)
-                        u*50, i*50,50, 50 // 描画する位置とサイズ (dx, dy, dw, dh)
-                    );
-                };
-              }  
-            }
-        }    
+            for(let u=0;u<16;u++){
+                let mapno=map[i][u]//1:野  2:海  3:山
+                ctx.drawImage(
+                    this.Images[mapno-1],
+                    0, 0, 50, 50, // 切り取る部分の (sx, sy, sw, sh)
+                    u*50, i*50,50, 50 // 描画する位置とサイズ (dx, dy, dw, dh)
+                );
+            }      
+          }
+        }      
     }    
 
+
+
     //インスタンス化
-    const Bk=new Back(image2,image3,image_stone,image5)
+    const Images=[image2,image3,image5]
+    const Bk=new Back(Images)
     const P1=new Player(100,100,50,image)
     const F1=new Fune(600,450,50,image_hune1)
     const M1=new Mov(300,450,50,image_mov)
