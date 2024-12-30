@@ -16,8 +16,8 @@
         image2.src="img/green.png";
         const image3 =new Image();
         image3.src="img/sea.png";
-        const image4 =new Image();
-        image4.src="img/stone.png";
+        const image_stone =new Image();
+        image_stone.src="img/stone.png";
         const image5 =new Image();
         image5.src="img/mount.png";
         const image_hune1=new Image;
@@ -189,7 +189,8 @@
     }
 
     class Stone {
-            constructor(x, y, size, image) {
+            constructor(x, y, i,size, image) {
+                this.id = i;
                 this.x = x;
                 this.y = y;
                 this.x2=x/50
@@ -198,6 +199,7 @@
                 this.image=image
             }
             draw(){
+              console.log("id="+this.id)  
               ctx.drawImage(
                     this.image,
                     0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
@@ -285,6 +287,14 @@
                 return false
             }
 
+            stoneCheck(x,y,Ss){
+                for (let S of Ss){
+                    if (S.x==x && S.y==y)
+                        return S.id
+                }
+                return -1
+            }
+
 
             move(dx,dy){
                 let x1f=this.x+dx//1step先
@@ -299,7 +309,8 @@
                 let ym=Math.floor(y1f/50)
                 if (map[ym][xm]!=1)return
 
-                if (x1f ==S1.x && y1f==S1.y){//石か
+                let stoneId=this.stoneCheck(x1f,y1f,Ss)
+                if (stoneId >= 0){//石か
                     //枠外か
                     if (x2f<0 || x2f >= 800 || y2f<0 || y2f >=600)return
                     //野か
@@ -308,18 +319,18 @@
                     if (map[y2m][x2m]!=1)return
 
 
-                    if (x2f ==S1.x && y2f==S1.y){//石か
+                    if (this.stoneCheck(x2f,y2f,Ss) >= 0){//石か
                         return
                     } else if (this.bugCheck(x2f,y2f,Bs)==true){
                         return 
                     } else if (x2f ==M1.x && y2f==M1.y){//モブか
                         return     
-                    } else {//進める
+                    } else {//なにもないので石も人も進める
                         isRepeating = true;
-                        this.x=x1f;
+                        this.x=x1f;//人を進める
                         this.y=y1f;
-                        S1.x=x2f;
-                        S1.y=y2f;
+                        Ss[stoneId].x=x2f;//石を進める
+                        Ss[stoneId].y=y2f;
                     }   
                 } else if (this.bugCheck(x1f,y1f,Bs)==true){//虫か
                     return 
@@ -327,7 +338,7 @@
                     return     
                 // } else if (this.movCheck(x1f,y1f,Ms)==true){//モブか
                 //     return     
-                } else{//なにもないところなので進める
+                } else{//なにもないところなので人だけ進める
                     isRepeating = true;
                     this.x=x1f;
                     this.y=y1f;
@@ -335,7 +346,7 @@
             }//move
     
 
-            update(S1,M1,Bs){  
+            update(Ss,M1,Bs){  
               this.fps+=1;
               if (isRepeating==false || this.fps%10==0){
                 this.fps=0;
@@ -392,17 +403,23 @@
     }    
 
     //インスタンス化
-    const Bk=new Back(image2,image3,image4,image5)
+    const Bk=new Back(image2,image3,image_stone,image5)
     const P1=new Player(100,100,50,image)
-    const S1=new Stone(200,100,50,image4)
     const F1=new Fune(600,450,50,image_hune1)
     const M1=new Mov(300,450,50,image_mov)
 
-    const Bs = [];//虫
+    const Bs = [];//虫(複数)
     for (let i = 0; i < 3; i++) {
         const x = 200 + i * 100; // x座標を変化させる
         const y = 300;          // y座標は固定
         Bs.push(new Bug(x, y, i, 50, image_bug1));
+    }
+
+    const Ss = [];//石（複数）
+    for (let i = 0; i < 3; i++) {
+        const x = 250 + i * 100; // x座標を変化させる
+        const y = 50 +i*100;          // y座標は固定
+        Ss.push(new Stone(x, y, i, 50, image_stone));
     }
 
     //main loop
@@ -414,9 +431,11 @@
             B.draw();
         }
         F1.draw();//船
-        P1.update(S1,M1,Bs);//プレイや
+        P1.update(Ss,M1,Bs);//プレイや
         P1.draw();
-        S1.draw();//石
+        for (const S of Ss) {//石
+            S.draw();
+        }
         M1.update(P1);//mov
         M1.draw();//mov
         //
@@ -429,7 +448,7 @@
         
 
     let imagesLoaded = 0;
-    const images = [image, image2, image3, image4];
+    const images = [image, image2, image3, image_stone];
 
     images.forEach(img => {
         img.onload = () => {
