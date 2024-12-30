@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const image = new Image();
+        image.src = "img/man1.png";
+        const image2 =new Image();
+        image2.src="img/green.png";
+        const image3 =new Image();
+        image3.src="img/sea.png";
+        const image4 =new Image();
+        image4.src="img/stone.png";
+        const image5 =new Image();
+        image5.src="img/mount.png";
+        const image_hune1=new Image;
+        image_hune1.src="img/hune1.png";
+        const image_bug1=new Image;
+        image_bug1.src="img/bug1.png";
+
+        const image_mov = new Image();
+        image_mov.src = "img/man2.png";
+
+
+        let isRepeating=false//通常fpsの途中だとキーは受け付けない、リピートが速すぎるので10fpsに一回しか反応しないようにしている。たがそれだと最初のキー入力が微妙に遅れる感じがある
+        // このフラグがfalseならキーに反応するようにした、一度反応したらtrueで、キーをアップしたらfalseにもどる
+        let movingLeft=false
+        let movingRight=false
+        let movingup=false
+        let movingdown=false
+        //1:field  2:sea  3:  
+        const map=[
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,3,3,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,1,3,3,3,3,1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,2,2,2,2,2,1,1],
+        [1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2],
+        [1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2],
+        ]
+        const f1=(e) => {
+            if (e.key === 'ArrowLeft') {
+                movingLeft = true;
+            }
+            if (e.key === 'ArrowRight') {
+                movingRight = true;
+            }
+            if (e.key === 'ArrowUp'){
+                movingup = true;
+            }
+            if (e.key === 'ArrowDown'){
+                movingdown = true;
+            }
+        }
+        // キーボードイベントリスナー
+        window.addEventListener('keydown',f1 );
+
+        window.addEventListener('keyup', (e) => {
+            isRepeating=false;
+            if (e.key === 'ArrowLeft') {
+                movingLeft = false;
+            }
+            if (e.key === 'ArrowRight') {
+                movingRight = false;
+            }
+            if (e.key === 'ArrowUp'){
+                movingup = false;
+            }
+            if (e.key === 'ArrowDown'){
+                movingdown = false;
+            }
+        });
+
+    class Mov{
+            constructor(x, y, size, image_mov) {
+                this.x = x;
+                this.y = y;
+                this.x2=Math.floor(x/50)
+                this.y2=Math.floor(y/50) 
+                this.size=size
+                this.image=image_mov
+                this.ct=0
+                this.hp=100
+            }
+            
+            update(P){
+                let oldx=this.x
+                let oldy=this.y
+                this.x2=Math.floor(this.x/50)
+                this.y2=Math.floor(this.y/50) 
+                this.ct+=1
+                if (this.ct==10 && this.hp>0){//早すぎるので10フレームに１回だけ更新する
+                    this.ct=0
+                    let number = Math.floor(Math.random() * 4); // 0から3の間の整数       
+                    if (number==0 && this.x>0 && map[this.y2][this.x2-1]==1)
+                        this.x-=25
+                    if(number==1 && this.x<750 && map[this.y2][this.x2+1]==1)
+                        this.x+=25
+                    if (number==2 && this.y>0 && map[this.y2-1][this.x2]==1)
+                        this.y-=25
+                    if(number==3 && this.y<550 && map[this.y2+1][this.x2]==1)
+                        this.y+=25
+                    // //巨人チェック
+
+                    if (P.x2==this.x2 && P.y2==this.y2) {
+                         this.x=oldx
+                         this.y=oldy
+                    }    
+                }  //if(this.ct==10) 10フレームに１回だけ実行
+            } //update                 
+            draw(){    
+                if (this.hp>0){
+                    ctx.drawImage(
+                        this.image,
+                        0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
+                        this.x, this.y, 40, 40 // 描画する位置とサイズ (dx, dy, dw, dh)
+                    );
+                }    
+            }    //draw(){
+        }//class
+
+    class Fune{
+        constructor(x, y, size, image_hune1) {
+            this.fx = x;
+            this.fy = y;
+            this.fx2=Math.floor(x/50)
+            this.fy2=Math.floor(y/50) 
+            this.size=size
+            this.image=image_hune1
+            this.ff=true
+            this.ff2=10
+        }
+        draw(){
+            if (this.ff2==10){
+                this.ff=true
+                this.ff2=0
+            };
+            let oldfx=this.fx
+            let oldfy=this.fy         
+            let number = Math.floor(Math.random() * 4); // 0から100の間の整数       
+            //console.log(number)
+            if (this.ff==true){
+                if (number==0){
+                this.fx-=50
+                }
+                if(number==1){
+                    this.fx=this.fx+50
+                }
+                if (number==2){
+                    this.fy=this.fy-50
+                }
+                if(number==3){
+                    this.fy=this.fy+50
+                }
+                this.ff=false
+                
+            };
+            this.ff2+=1
+            if(this.fx>750){
+            this.fx=750
+            }     
+            if(this.fy>550){
+                this.fy=550
+            };
+            this.fx2=this.fx/50
+            this.fy2=this.fy/50 
+            if(map[this.fy2][this.fx2]!==2){
+                this.fx=oldfx
+                this.fy=oldfy
+            };
+            ctx.drawImage(
+                this.image,
+                0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
+                this.fx, this.fy, 100, 100// 描画する位置とサイズ (dx, dy, dw, dh)
+            );
+        }
+    }
+
+    class Stone {
+            constructor(x, y, size, image) {
+                this.x = x;
+                this.y = y;
+                this.x2=x/50
+                this.y2=y/50 
+                this.size=size
+                this.image=image
+            }
+            draw(){
+              ctx.drawImage(
+                    this.image,
+                    0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
+                    this.x, this.y, 80, 80 // 描画する位置とサイズ (dx, dy, dw, dh)
+              );              
+            } 
+          }
+
+    class Bug {
+        constructor(x, y, id, size, image) {
+            this.bx = x;
+            this.by = y;
+            this.id=id;    
+            this.bx2=Math.floor(this.bx/50)
+            this.by2=Math.floor(this.by/50) 
+            this.size=size
+            this.image=image
+            //this.bf=true
+            this.ct=0
+            
+        }
+        update(M){
+            let oldbx=this.bx
+            let oldby=this.by
+            this.bx2=Math.floor(this.bx/50)//マス目座標の計算
+            this.by2=Math.floor(this.by/50) 
+            this.ct+=1//カウンタ　10fpsに1回だけ更新用
+            if (this.ct==10){
+                this.ct=0
+
+                //ランダムで上下左右に移動
+                let number = Math.floor(Math.random() * 4); // 0から3の間の整数で方向を決める      
+                if (number==0 && this.bx>0 && map[this.by2][this.bx2-1]==1){//左
+                    this.bx-=50
+                }
+                if(number==1 && this.bx<750 && map[this.by2][this.bx2+1]==1){//右
+                        this.bx=this.bx+50
+                }
+                if (number==2 && this.by>0 && map[this.by2-1][this.bx2]==1){//上
+                    this.by=this.by-50
+                }
+                if(number==3 && this.by<550 && map[this.by2+1][this.bx2]==1){//下
+                    this.by=this.by+50
+                }
+
+                //モブと遭遇したか
+                // if (M.x2==this.bx2 && M.y2==this.by2) {
+                //     M.hp-=50
+                //     alert("hit M.hp="+M.hp)
+                // }    
+
+            };
+        }                
+        draw(){
+            ctx.drawImage(this.image,
+                0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
+                this.bx, this.by, 80, 80 // 描画する位置とサイズ (dx, dy, dw, dh)
+            );
+        };
+    }    
+
+    class Player {
+            constructor(x, y, size, image) {
+                this.x = x;
+                this.y = y;
+                this.x2=Math.floor(x/50)
+                this.y2=Math.floor(y/50)                 
+                this.size=size
+                this.image=image
+                this.fps=0
+            }
+            draw(){
+              ctx.drawImage(
+                    this.image,
+                    0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
+                    this.x, this.y, 80, 80 // 描画する位置とサイズ (dx, dy, dw, dh)
+                );
+            }
+
+            bugCheck(x,y,Bs){
+                for (let B of Bs){
+                    if (B.bx==x && B.by==y)
+                        return true
+                }
+                return false
+            }
+
+
+            move(dx,dy){
+                let x1f=this.x+dx//1step先
+                let y1f=this.y+dy
+                let x2f=this.x+(dx*2)//2step先
+                let y2f=this.y+(dy*2)
+                //枠外か
+                if (x1f<0 || x1f >= 800 || y1f<0 || y1f >=600)return
+
+                //野か
+                let xm=Math.floor(x1f/50)
+                let ym=Math.floor(y1f/50)
+                if (map[ym][xm]!=1)return
+
+                if (x1f ==S1.x && y1f==S1.y){//石か
+                    //枠外か
+                    if (x2f<0 || x2f >= 800 || y2f<0 || y2f >=600)return
+                    //野か
+                    let x2m=Math.floor(x2f/50)
+                    let y2m=Math.floor(y2f/50)
+                    if (map[y2m][x2m]!=1)return
+
+
+                    if (x2f ==S1.x && y2f==S1.y){//石か
+                        return
+                    } else if (this.bugCheck(x2f,y2f,Bs)==true){
+                        return 
+                    } else if (x2f ==M1.x && y2f==M1.y){//モブか
+                        return     
+                    } else {//進める
+                        isRepeating = true;
+                        this.x=x1f;
+                        this.y=y1f;
+                        S1.x=x2f;
+                        S1.y=y2f;
+                    }   
+                } else if (this.bugCheck(x1f,y1f,Bs)==true){//虫か
+                    return 
+                } else if (x1f ==M1.x && y1f==M1.y){//モブか
+                    return     
+                // } else if (this.movCheck(x1f,y1f,Ms)==true){//モブか
+                //     return     
+                } else{//なにもないところなので進める
+                    isRepeating = true;
+                    this.x=x1f;
+                    this.y=y1f;
+                }
+            }//move
+    
+
+            update(S1,M1,Bs){  
+              this.fps+=1;
+              if (isRepeating==false || this.fps%10==0){
+                this.fps=0;
+                if (movingLeft==true){//左
+                    this.move(-50,0)
+                }    
+                if (movingRight==true){//左
+                    this.move(50,0)
+                }
+                if (movingup==true){//上
+                    this.move(0,-50)
+                }
+                if (movingdown==true){//下
+                    this.move(0,50)
+                }
+              }//if
+            }//update  
+          }//class
+
+    class Back{
+        constructor(image2,image3,image4,image5){    
+            this.image2=image2
+            this.image3=image3
+            this.image4=image4
+            this.image5=image5
+        }
+        draw=()=>{    
+          for(let i=0;i<12;i++){
+              for(let u=0;u<16;u++){
+                if(map[i][u]==1){//野
+                    ctx.drawImage(
+                        this.image2,
+                        0, 0, 50, 50, // 切り取る部分の (sx, sy, sw, sh)
+                        u*50, i*50,50, 50 // 描画する位置とサイズ (dx, dy, dw, dh)
+                    );
+                };
+                if(map[i][u]==2){//海
+                    ctx.drawImage(
+                        this.image3,
+                        0, 0, 50, 50, // 切り取る部分の (sx, sy, sw, sh)
+                        u*50, i*50,50, 50 // 描画する位置とサイズ (dx, dy, dw, dh)
+                    );
+                };
+                if(map[i][u]==3){//山
+                    ctx.drawImage(
+                        this.image5,
+                        0, 0, 50, 50, // 切り取る部分の (sx, sy, sw, sh)
+                        u*50, i*50,50, 50 // 描画する位置とサイズ (dx, dy, dw, dh)
+                    );
+                };
+              }  
+            }
+        }    
+    }    
+
+    //インスタンス化
+    const Bk=new Back(image2,image3,image4,image5)
+    const P1=new Player(100,100,50,image)
+    const S1=new Stone(200,100,50,image4)
+    const F1=new Fune(600,450,50,image_hune1)
+    const M1=new Mov(300,450,50,image_mov)
+
+    const Bs = [];//虫
+    for (let i = 0; i < 3; i++) {
+        const x = 200 + i * 100; // x座標を変化させる
+        const y = 300;          // y座標は固定
+        Bs.push(new Bug(x, y, i, 50, image_bug1));
+    }
+
+    //main loop
+    function draw_flame(){
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // 画面クリア
+        Bk.draw()
+        for (const B of Bs) {//虫
+            B.update(M1);
+            B.draw();
+        }
+        F1.draw();//船
+        P1.update(S1,M1,Bs);//プレイや
+        P1.draw();
+        S1.draw();//石
+        M1.update(P1);//mov
+        M1.draw();//mov
+        //
+        requestAnimationFrame(draw_flame)
+    };
+
+    // image.onload = function() {
+    // draw_flame();
+    // };
+        
+
+    let imagesLoaded = 0;
+    const images = [image, image2, image3, image4];
+
+    images.forEach(img => {
+        img.onload = () => {
+            imagesLoaded++;
+            if (imagesLoaded === images.length) {
+                draw_flame();
+            }
+        };
+    });
+
+
+    </script>
+</body>
+</html>
