@@ -221,6 +221,39 @@
             this.ct=0
             
         }
+        stoneCheck(x,y,Ss){//石があるかのチェック　３次受け
+                for (let S of Ss){
+                    if (S.x==x && S.y==y)
+                        return S.id
+                }
+                return -1
+            }
+
+        move(dx,dy){//上下左右への移動（updateの２次受け
+                let x1f=this.bx+dx//1step先
+                let y1f=this.by+dy
+                //枠外か
+                if (x1f<0 || x1f >= 800 || y1f<0 || y1f >=600)return
+
+                //野か
+                let xm=Math.floor(x1f/50)
+                let ym=Math.floor(y1f/50)
+                if (map[ym][xm]!=1)return
+
+                let stoneId=this.stoneCheck(x1f,y1f,Ss)
+                if (stoneId >= 0){
+                    return
+                }  else if (x1f ==M1.x && y1f==M1.y){//モブか
+                    return     
+                // } else if (this.movCheck(x1f,y1f,Ms)==true){//モブか
+                //     return     
+                } else{//なにもないところなので人だけ進める
+                    this.bx=x1f;
+                    this.by=y1f;
+                }
+            }//move
+   
+
         update(M){
             let oldbx=this.bx
             let oldby=this.by
@@ -232,27 +265,22 @@
 
                 //ランダムで上下左右に移動
                 let number = Math.floor(Math.random() * 4); // 0から3の間の整数で方向を決める      
-                if (number==0 && this.bx>0 && map[this.by2][this.bx2-1]==1){//左
-                    this.bx-=50
-                }
-                if(number==1 && this.bx<750 && map[this.by2][this.bx2+1]==1){//右
-                        this.bx=this.bx+50
-                }
-                if (number==2 && this.by>0 && map[this.by2-1][this.bx2]==1){//上
-                    this.by=this.by-50
-                }
-                if(number==3 && this.by<550 && map[this.by2+1][this.bx2]==1){//下
-                    this.by=this.by+50
-                }
 
-                //モブと遭遇したか
-                // if (M.x2==this.bx2 && M.y2==this.by2) {
-                //     M.hp-=50
-                //     alert("hit M.hp="+M.hp)
-                // }    
-
+                if (number==0){//左
+                    this.move(-50,0)
+                }    
+                if (number==1){//左
+                    this.move(50,0)
+                }
+                if (number==2){//上
+                    this.move(0,-50)
+                }
+                if (number==3){//下
+                    this.move(0,50)
+                }
             };
         }                
+
         draw(){
             ctx.drawImage(this.image,
                 0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
