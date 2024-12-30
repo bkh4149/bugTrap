@@ -10,23 +10,14 @@
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
-        const image = new Image();
-        image.src = "img/man1.png";
-        const image2 =new Image();
-        image2.src="img/green.png";
-        const image3 =new Image();
-        image3.src="img/sea.png";
-        const image_stone =new Image();
-        image_stone.src="img/stone.png";
-        const image5 =new Image();
-        image5.src="img/mount.png";
-        const image_hune1=new Image;
-        image_hune1.src="img/hune1.png";
-        const image_bug1=new Image;
-        image_bug1.src="img/bug1.png";
-
-        const image_mov = new Image();
-        image_mov.src = "img/man2.png";
+        const image = new Image();        image.src = "img/man1.png";
+        const image2 =new Image();        image2.src="img/green.png";
+        const image3 =new Image();        image3.src="img/sea.png";
+        const image_stone =new Image();   image_stone.src="img/stone.png";
+        const image5 =new Image();        image5.src="img/mount.png";
+        const image_hune1=new Image;      image_hune1.src="img/hune1.png";
+        const image_bug1=new Image;       image_bug1.src="img/bug1.png";
+        const image_mov = new Image();    image_mov.src = "img/man2.png";
 
 
         let isRepeating=false//リピートが速すぎるので10fpsに一回しか反応しないようにしている。たがそれだと最初のキー入力が微妙に遅れる感じがある
@@ -84,52 +75,51 @@
         });
 
     class Mov{
-            constructor(x, y, size, image_mov) {
-                this.x = x;
-                this.y = y;
-                this.x2=Math.floor(x/50)
-                this.y2=Math.floor(y/50) 
-                this.size=size
-                this.image=image_mov
+        constructor(x, y, size, image_mov) {
+            this.x = x;
+            this.y = y;
+            this.x2=Math.floor(x/50)
+            this.y2=Math.floor(y/50) 
+            this.size=size
+            this.image=image_mov
+            this.ct=0
+            this.hp=100
+        }
+        update(P){
+            let oldx=this.x
+            let oldy=this.y
+            this.x2=Math.floor(this.x/50)
+            this.y2=Math.floor(this.y/50) 
+            this.ct+=1
+            if (this.ct==10 && this.hp>0){//早すぎるので10フレームに１回だけ更新する
                 this.ct=0
-                this.hp=100
-            }
-            
-            update(P){
-                let oldx=this.x
-                let oldy=this.y
-                this.x2=Math.floor(this.x/50)
-                this.y2=Math.floor(this.y/50) 
-                this.ct+=1
-                if (this.ct==10 && this.hp>0){//早すぎるので10フレームに１回だけ更新する
-                    this.ct=0
-                    let number = Math.floor(Math.random() * 4); // 0から3の間の整数       
-                    if (number==0 && this.x>0 && map[this.y2][this.x2-1]==1)
-                        this.x-=25
-                    if(number==1 && this.x<750 && map[this.y2][this.x2+1]==1)
-                        this.x+=25
-                    if (number==2 && this.y>0 && map[this.y2-1][this.x2]==1)
-                        this.y-=25
-                    if(number==3 && this.y<550 && map[this.y2+1][this.x2]==1)
-                        this.y+=25
-                    // //巨人チェック
+                let number = Math.floor(Math.random() * 4); // 0から3の間の整数       
+                if (number==0 && this.x>0 && map[this.y2][this.x2-1]==1)
+                    this.x-=25
+                if(number==1 && this.x<750 && map[this.y2][this.x2+1]==1)
+                    this.x+=25
+                if (number==2 && this.y>0 && map[this.y2-1][this.x2]==1)
+                    this.y-=25
+                if(number==3 && this.y<550 && map[this.y2+1][this.x2]==1)
+                    this.y+=25
+                // //巨人チェック
 
-                    if (P.x2==this.x2 && P.y2==this.y2) {
-                         this.x=oldx
-                         this.y=oldy
-                    }    
-                }  //if(this.ct==10) 10フレームに１回だけ実行
-            } //update                 
-            draw(){    
-                if (this.hp>0){
-                    ctx.drawImage(
-                        this.image,
-                        0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
-                        this.x, this.y, 40, 40 // 描画する位置とサイズ (dx, dy, dw, dh)
-                    );
+                if (P.x2==this.x2 && P.y2==this.y2) {
+                        this.x=oldx
+                        this.y=oldy
                 }    
-            }    //draw(){
-        }//class
+            }  //if(this.ct==10) 10フレームに１回だけ実行
+        } //update                 
+        draw(){    
+            if (this.hp>0){
+                ctx.drawImage(
+                    this.image,
+                    0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
+                    this.x, this.y, 40, 40 // 描画する位置とサイズ (dx, dy, dw, dh)
+                );
+            }    
+        }    //draw(){
+    }//class
 
     class Fune{
         constructor(x, y, size, image_hune1) {
@@ -189,35 +179,32 @@
     }
 
     class Stone {
-            constructor(x, y, i,size, image) {
-                this.id = i;
-                this.x = x;
-                this.y = y;
-                this.x2=x/50
-                this.y2=y/50 
-                this.size=size
-                this.image=image
-            }
-            draw(){
-              console.log("id="+this.id)  
-              ctx.drawImage(
-                    this.image,
-                    0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
-                    this.x, this.y, 80, 80 // 描画する位置とサイズ (dx, dy, dw, dh)
-              );              
-            } 
-          }
+        constructor(x, y, i,size, image) {
+            this.id = i;
+            this.x = x;
+            this.y = y;
+            this.x2=x/50
+            this.y2=y/50 
+            this.size=size
+            this.image=image
+        }
+        draw(){
+            console.log("id="+this.id)  
+            ctx.drawImage(
+                this.image,
+                0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
+                this.x, this.y, 80, 80 // 描画する位置とサイズ (dx, dy, dw, dh)
+            );              
+        } 
+    }
 
     class Bug {
         constructor(x, y, id, size, image) {
             this.bx = x;
             this.by = y;
             this.id=id;    
-            this.bx2=Math.floor(this.bx/50)
-            this.by2=Math.floor(this.by/50) 
             this.size=size
             this.image=image
-            //this.bf=true
             this.ct=0
             
         }
@@ -228,7 +215,6 @@
                 }
                 return -1
             }
-
         move(dx,dy){//上下左右への移動（updateの２次受け
                 let x1f=this.bx+dx//1step先
                 let y1f=this.by+dy
@@ -243,22 +229,20 @@
                 let stoneId=this.stoneCheck(x1f,y1f,Ss)
                 if (stoneId >= 0){
                     return
+                }  else if (x1f ==P1.x && y1f==P1.y){//人か
+                    return
                 }  else if (x1f ==M1.x && y1f==M1.y){//モブか
                     return     
                 // } else if (this.movCheck(x1f,y1f,Ms)==true){//モブか
                 //     return     
-                } else{//なにもないところなので人だけ進める
+                } else{//なにもないところなので虫だけ進める
                     this.bx=x1f;
                     this.by=y1f;
                 }
             }//move
-   
-
         update(M){
             let oldbx=this.bx
             let oldby=this.by
-            this.bx2=Math.floor(this.bx/50)//マス目座標の計算
-            this.by2=Math.floor(this.by/50) 
             this.ct+=1//カウンタ　10fpsに1回だけ更新用
             if (this.ct==10){
                 this.ct=0
@@ -280,7 +264,6 @@
                 }
             };
         }                
-
         draw(){
             ctx.drawImage(this.image,
                 0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
@@ -290,107 +273,102 @@
     }    
 
     class Player {
-            constructor(x, y, size, image) {
-                this.x = x;
-                this.y = y;
-                this.size=size
-                this.image=image
-                this.fps=0
+        constructor(x, y, size, image) {
+            this.x = x;
+            this.y = y;
+            this.size=size
+            this.image=image
+            this.fps=0
+        }
+        draw(){
+            ctx.drawImage(
+                this.image,
+                0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
+                this.x, this.y, 80, 80 // 描画する位置とサイズ (dx, dy, dw, dh)
+            );
+        }
+        bugCheck(x,y,Bs){//虫がいるかのチェック　３次受け
+            for (let B of Bs){
+                if (B.bx==x && B.by==y)
+                    return true
             }
-            draw(){
-              ctx.drawImage(
-                    this.image,
-                    0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
-                    this.x, this.y, 80, 80 // 描画する位置とサイズ (dx, dy, dw, dh)
-                );
+            return false
+        }
+        stoneCheck(x,y,Ss){//石があるかのチェック　３次受け
+            for (let S of Ss){
+                if (S.x==x && S.y==y)
+                    return S.id
             }
+            return -1
+        }
+        move(dx,dy){//上下左右への移動（updateの２次受け
+            let x1f=this.x+dx//1step先
+            let y1f=this.y+dy
+            let x2f=this.x+(dx*2)//2step先
+            let y2f=this.y+(dy*2)
+            //枠外か
+            if (x1f<0 || x1f >= 800 || y1f<0 || y1f >=600)return
 
-            bugCheck(x,y,Bs){//虫がいるかのチェック　３次受け
-                for (let B of Bs){
-                    if (B.bx==x && B.by==y)
-                        return true
-                }
-                return false
-            }
+            //野か
+            let xm=Math.floor(x1f/50)
+            let ym=Math.floor(y1f/50)
+            if (map[ym][xm]!=1)return
 
-            stoneCheck(x,y,Ss){//石があるかのチェック　３次受け
-                for (let S of Ss){
-                    if (S.x==x && S.y==y)
-                        return S.id
-                }
-                return -1
-            }
-
-            move(dx,dy){//上下左右への移動（updateの２次受け
-                let x1f=this.x+dx//1step先
-                let y1f=this.y+dy
-                let x2f=this.x+(dx*2)//2step先
-                let y2f=this.y+(dy*2)
+            let stoneId=this.stoneCheck(x1f,y1f,Ss)
+            if (stoneId >= 0){//石か
                 //枠外か
-                if (x1f<0 || x1f >= 800 || y1f<0 || y1f >=600)return
+                if (x2f<0 || x2f >= 800 || y2f<0 || y2f >=600)return
 
                 //野か
-                let xm=Math.floor(x1f/50)
-                let ym=Math.floor(y1f/50)
-                if (map[ym][xm]!=1)return
-
-                let stoneId=this.stoneCheck(x1f,y1f,Ss)
-                if (stoneId >= 0){//石か
-                    //枠外か
-                    if (x2f<0 || x2f >= 800 || y2f<0 || y2f >=600)return
-
-                    //野か
-                    let x2m=Math.floor(x2f/50)
-                    let y2m=Math.floor(y2f/50)
-                    if (map[y2m][x2m]!=1)return
+                let x2m=Math.floor(x2f/50)
+                let y2m=Math.floor(y2f/50)
+                if (map[y2m][x2m]!=1)return
 
 
-                    if (this.stoneCheck(x2f,y2f,Ss) >= 0){//石か
-                        return
-                    } else if (this.bugCheck(x2f,y2f,Bs)==true){
-                        return 
-                    } else if (x2f ==M1.x && y2f==M1.y){//モブか
-                        return     
-                    } else {//なにもないので石も人も進める
-                        isRepeating = true;
-                        this.x=x1f;//人を進める
-                        this.y=y1f;
-                        Ss[stoneId].x=x2f;//石を進める
-                        Ss[stoneId].y=y2f;
-                    }   
-                } else if (this.bugCheck(x1f,y1f,Bs)==true){//虫か
+                if (this.stoneCheck(x2f,y2f,Ss) >= 0){//石か
+                    return
+                } else if (this.bugCheck(x2f,y2f,Bs)==true){
                     return 
-                } else if (x1f ==M1.x && y1f==M1.y){//モブか
+                } else if (x2f ==M1.x && y2f==M1.y){//モブか
                     return     
-                // } else if (this.movCheck(x1f,y1f,Ms)==true){//モブか
-                //     return     
-                } else{//なにもないところなので人だけ進める
+                } else {//なにもないので石も人も進める
                     isRepeating = true;
-                    this.x=x1f;
+                    this.x=x1f;//人を進める
                     this.y=y1f;
-                }
-            }//move
-   
-
-            update(Ss,M1,Bs){  
-              this.fps+=1;
-              if (isRepeating==false || this.fps%10==0){
-                this.fps=0;
-                if (movingLeft==true){//左
-                    this.move(-50,0)
-                }    
-                if (movingRight==true){//左
-                    this.move(50,0)
-                }
-                if (movingup==true){//上
-                    this.move(0,-50)
-                }
-                if (movingdown==true){//下
-                    this.move(0,50)
-                }
-              }//if
-            }//update  
-          }//class
+                    Ss[stoneId].x=x2f;//石を進める
+                    Ss[stoneId].y=y2f;
+                }   
+            } else if (this.bugCheck(x1f,y1f,Bs)==true){//虫か
+                return 
+            } else if (x1f ==M1.x && y1f==M1.y){//モブか
+                return     
+            // } else if (this.movCheck(x1f,y1f,Ms)==true){//モブか
+            //     return     
+            } else{//なにもないところなので人だけ進める
+                isRepeating = true;
+                this.x=x1f;
+                this.y=y1f;
+            }
+        }//move
+        update(Ss,M1,Bs){  
+            this.fps+=1;
+            if (isRepeating==false || this.fps%10==0){
+            this.fps=0;
+            if (movingLeft==true){//左
+                this.move(-50,0)
+            }    
+            if (movingRight==true){//左
+                this.move(50,0)
+            }
+            if (movingup==true){//上
+                this.move(0,-50)
+            }
+            if (movingdown==true){//下
+                this.move(0,50)
+            }
+            }//if
+        }//update  
+    }//class
 
     class Back{//背景描画のため
         constructor(Images){    
@@ -409,8 +387,6 @@
           }
         }      
     }    
-
-
 
     //インスタンス化
     const Images=[image2,image3,image5]
