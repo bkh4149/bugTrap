@@ -20,7 +20,8 @@
         const image_bug2=new Image;       image_bug2.src="img/mushitake0.png";
         const image_mov = new Image();    image_mov.src = "img/man2.png";
 
-
+        let stage=0;
+        let map=[];
         let isRepeating=false//リピートが速すぎるので10fpsに一回しか反応しないようにしている。たがそれだと最初のキー入力が微妙に遅れる感じがある
         // このフラグがfalseならいつでもキーに反応するようにした。一度反応したらtrueで、キーをアップしたらfalseにもどる
         let movingLeft=false
@@ -28,20 +29,38 @@
         let movingup=false
         let movingdown=false
         //1:field  2:sea  3:  
-        const map=[
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,3,3,1,1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-        [1,1,3,3,3,3,1,1,1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1],
-        [1,1,1,1,1,1,1,1,1,2,2,2,2,2,1,1],
-        [1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,1],
-        [1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2],
-        [1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2],
+        map=[
+            [
+                [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+                [3,1,1,1,1,1,1,1,1,1,1,1,1,1,3,3],
+                [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+                [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3],
+                [3,1,1,1,1,3,3,1,1,1,1,1,1,1,1,1],
+                [3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                [3,1,3,3,3,3,1,1,1,1,1,1,1,1,1,1],
+                [3,1,3,1,1,1,1,1,2,2,2,1,1,1,1,1],
+                [3,1,3,1,1,1,1,1,1,2,2,2,2,2,1,1],
+                [3,1,3,1,1,1,1,1,1,1,1,2,2,2,2,1],
+                [3,1,3,1,1,1,1,1,1,1,1,1,2,2,2,2],
+                [3,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2],
+            ],
+            [
+                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                [1,1,1,1,1,3,3,1,1,1,1,1,1,1,1,1],
+                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                [1,1,3,3,3,3,1,1,1,1,1,1,1,1,1,1],
+                [1,1,1,1,1,1,1,1,2,2,2,1,1,1,1,1],
+                [1,1,1,1,1,1,1,1,1,2,2,2,2,2,1,1],
+                [1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,1],
+                [1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2],
+                [1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2],
+            ],
         ]
+        //console.log("map="+map);
+
         const f1=(e) => {
             if (e.key === 'ArrowLeft') {
                 movingLeft = true;
@@ -107,7 +126,7 @@
                 let xm=Math.floor(x1f/50)
                 let ym=Math.floor(y1f/50)
                 //console.log("xm="+xm+"  ym="+ym)
-                if (map[ym][xm]!=1)return
+                if (map[stage][ym][xm]!=1)return
 
                 //石か    
                 let stoneId=this.stoneCheck(xm,ym,Ss)
@@ -199,7 +218,7 @@
             };
             this.fx2=this.fx/50
             this.fy2=this.fy/50 
-            if(map[this.fy2][this.fx2]!==2){
+            if(map[stage][this.fy2][this.fx2]!==2){
                 this.fx=oldfx
                 this.fy=oldfy
             };
@@ -259,7 +278,7 @@
                 //野か
                 let xm=Math.floor(x1f/50)
                 let ym=Math.floor(y1f/50)
-                if (map[ym][xm]!=1)
+                if (map[stage][ym][xm]!=1)
                     {this.hp -=1;return}
                 let stoneId=this.stoneCheck(x1f,y1f,Ss)
                 if (stoneId >= 0){
@@ -280,7 +299,7 @@
             this.ct+=1//カウンタ　10fpsに1回だけ更新用
             if (this.ct==10){
                 this.ct=0
-                console.log("id="+this.id+"  this.stopCt="+this.stopCt);
+                //console.log("id="+this.id+"  this.stopCt="+this.stopCt);
                 //ランダムで上下左右に移動
                 let number = Math.floor(Math.random() * 4); // 0から3の間の整数で方向を決める      
                 if (number==0){//左
@@ -352,7 +371,7 @@
             //野か
             let xm=Math.floor(x1f/50)
             let ym=Math.floor(y1f/50)
-            if (map[ym][xm]!=1)return
+            if (map[stage][ym][xm]!=1)return
 
             let stoneId=this.stoneCheck(x1f,y1f,Ss)
             if (stoneId >= 0){//石か
@@ -362,7 +381,7 @@
                 //野か
                 let x2m=Math.floor(x2f/50)
                 let y2m=Math.floor(y2f/50)
-                if (map[y2m][x2m]!=1)return
+                if (map[stage][y2m][x2m]!=1)return
                 if (this.stoneCheck(x2f,y2f,Ss) >= 0){//石か
                     return
                 } else if (this.bugCheck(x2f,y2f,Bs)==true){//虫か
@@ -415,7 +434,7 @@
         draw=()=>{    
           for(let i=0;i<12;i++){
             for(let u=0;u<16;u++){
-                let mapno=map[i][u]//1:野  2:海  3:山
+                let mapno=map[stage][i][u]//1:野  2:海  3:山
                 ctx.drawImage(
                     this.Images[mapno-1],
                     0, 0, 50, 50, // 切り取る部分の (sx, sy, sw, sh)
@@ -426,34 +445,36 @@
         }      
     }    
 
-    //インスタンス化
-    const Images=[image2,image3,image5]
-    const Bk=new Back(Images)
-    const P1=new Player(100,100,50,image)
-    const F1=new Fune(600,450,50,image_hune1)
-    const M1=new Mov(300,450,50,image_mov)
+    let Bk,P1,F1,M1,Bs=[],Ss=[],Ms=[];
 
-    let Bs = [];//虫(複数)
-    for (let i = 0; i < 3; i++) {
-        const x = 200 + i * 100; // x座標を変化させる
-        const y = 300;          // y座標は固定
-        Bs.push(new Bug(x, y, i, 50, image_bug1, image_bug2));
+    const insta=()=>{
+        //インスタンス化
+        const Images=[image2,image3,image5]
+        Bk=new Back(Images)
+        P1=new Player(100,100,50,image)
+        F1=new Fune(600,450,50,image_hune1)
+        M1=new Mov(300,450,50,image_mov)
+        //Bs = [];//虫(複数)
+        for (let i = 0; i < 3; i++) {
+            const x = 200 + i * 100; // x座標を変化させる
+            const y = 300;          // y座標は固定
+            Bs.push(new Bug(x, y, i, 50, image_bug1, image_bug2));
+        }
+        //Ss = [];//石（複数）
+        for (let i = 0; i < 6-stage; i++) {
+            const x = 250 + i * 50; // x座標を変化させる
+            const y = 50 +i*50;          // y座標は固定
+            Ss.push(new Stone(x, y, i, 50, image_stone));
+        }
+        //const Ms = [];//モブ（複数）
+        for (let i = 0; i < 5; i++) {
+            const x = 250 + i * 50; // x座標を変化させる
+            const y = 150 +i*50;          // y座標は固定
+            Ms.push(new Mov(x, y, i, 50, image_mov));
+        }
     }
 
-    const Ss = [];//石（複数）
-    for (let i = 0; i < 3; i++) {
-        const x = 250 + i * 100; // x座標を変化させる
-        const y = 50 +i*100;          // y座標は固定
-        Ss.push(new Stone(x, y, i, 50, image_stone));
-    }
-
-    const Ms = [];//モブ（複数）
-    for (let i = 0; i < 5; i++) {
-        const x = 250 + i * 50; // x座標を変化させる
-        const y = 150 +i*50;          // y座標は固定
-        Ms.push(new Mov(x, y, i, 50, image_mov));
-    }
-
+    insta()
     //main loop
     function draw_flame(){
         ctx.clearRect(0, 0, canvas.width, canvas.height); // 画面クリア
@@ -462,16 +483,19 @@
             B.update(M1);
             B.draw();
         }
-
         let survivingBs = Bs.filter(B => B.hp > 0);
         Bs=survivingBs;
-
         F1.draw();//船
         P1.update(Ss,M1,Bs);//プレイや
         P1.draw();
         for (const S of Ss) {//石
             S.draw();
         }
+        if (Bs.length==0){
+            stage+=1;
+            insta();
+        }
+        console.log("Bs.length="+Bs.length+" stage="+stage)
         // for (const M of Ms) {//モブ
         //     M.update(P1);//mov
         //     M.draw();//mov
