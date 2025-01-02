@@ -20,7 +20,7 @@
         const image_bug2=new Image;       image_bug2.src="img/mushitake0.png";
         const image_mov = new Image();    image_mov.src = "img/man2.png";
 
-        let stage=2;
+        let stage=0;
         let map=[];
         let isRepeating=false//リピートが速すぎるので10fpsに一回しか反応しないようにしている。たがそれだと最初のキー入力が微妙に遅れる感じがある
         // このフラグがfalseならいつでもキーに反応するようにした。一度反応したらtrueで、キーをアップしたらfalseにもどる
@@ -507,16 +507,18 @@
         for (const S of Ss) {//石
             S.draw();
         }
-        if (Bs.length==0){
-            stage+=1;
-            insta();
-        }
-        console.log("Bs.length="+Bs.length+" stage="+stage)
         // for (const M of Ms) {//モブ
         //     M.update(P1);//mov
         //     M.draw();//mov
         // }        
         //
+        if (Bs.length==0){
+            stage+=1;
+            if (stage==3){
+                return
+            }
+            insta();
+        }
         requestAnimationFrame(draw_flame)
     };
 
@@ -534,6 +536,7 @@
             if (imagesLoaded === images.length) {
                 draw_flame();
             }
+            
         };
     });
 
