@@ -454,19 +454,19 @@
         P1=new Player(100,100,50,image)
         F1=new Fune(600,450,50,image_hune1)
         M1=new Mov(300,450,50,image_mov)
-        //Bs = [];//虫(複数)
+        Bs = [];//虫(複数)
         for (let i = 0; i < 3; i++) {
             const x = 200 + i * 100; // x座標を変化させる
             const y = 300;          // y座標は固定
             Bs.push(new Bug(x, y, i, 50, image_bug1, image_bug2));
         }
-        //Ss = [];//石（複数）
+        Ss = [];//石（複数）
         for (let i = 0; i < 6-stage; i++) {
             const x = 250 + i * 50; // x座標を変化させる
             const y = 50 +i*50;          // y座標は固定
             Ss.push(new Stone(x, y, i, 50, image_stone));
         }
-        //const Ms = [];//モブ（複数）
+        Ms = [];//モブ（複数）
         for (let i = 0; i < 5; i++) {
             const x = 250 + i * 50; // x座標を変化させる
             const y = 150 +i*50;          // y座標は固定
