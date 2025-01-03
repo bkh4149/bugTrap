@@ -135,9 +135,9 @@
                 if (map[stage][ym][xm]!=1)return
 
                 //石か    
-                if (objCheck(xm,ym,Ss) >= 0){
+                if (objCheck2(xm,ym,Ss) >= 0){
                     return
-                }  else if (x1f ==P1.x && y1f==P1.y){//人か
+                }  else if (xm ==P1.x/50 && ym==P1.y/50){//人か
                     return
                 } else{//なにもないところなので進める
                     this.x=x1f;
@@ -289,8 +289,8 @@
                 //モブのチェック    
                 let movId=objCheck(x1f,y1f,Ms)
                 if (movId>=0){//モブか
-                    console.log("@283 movId="+movId)
-                    console.log("@284 Ms[movId].hp="+Ms[movId].hp)
+                    // console.log("@283 movId="+movId)
+                    // console.log("@284 Ms[movId].hp="+Ms[movId].hp)
                     Ms[movId].hp-=50
                     return     
                 } 
@@ -335,6 +335,20 @@
         };
     }    
 
+    //マス座標での比較
+    const objCheck2=(xm,ym,Os)=>{//オブジェ奥とがあるかのチェック　３次受け
+        //あるならそのid番号、なければ-1
+            let idx=0;
+            for (let O of Os){
+                let omx=O.x/50
+                let omy=O.y/50
+
+                if (omx==xm && omy==ym)
+                    return idx
+                idx+=1;
+            }
+            return -1
+        }    
 
     const objCheck=(x,y,Os)=>{//オブジェ奥とがあるかのチェック　３次受け
         //あるならそのid番号、なければ-1
@@ -474,8 +488,8 @@
         }
         Ms = [];//モブ（複数）
         for (let i = 0; i < 5; i++) {
-            const x = 250 + i*50;     // x座標を変化させる
-            const y = 150 + i*50;        // y座標は固定
+            const x = 450 + i*25;     // x座標を変化させる
+            const y =  50 + i*25;        // y座標は固定
             Ms.push(new Mov(x, y, i, 50, image_mov,image_mov2));
         }
     }
