@@ -19,6 +19,7 @@
         const image_bug1=new Image;       image_bug1.src="img/bug1.png";
         const image_bug2=new Image;       image_bug2.src="img/mushitake0.png";
         const image_mov = new Image();    image_mov.src = "img/man2.png";
+        const image_mov2 = new Image();    image_mov2.src = "img/mushitake5.png";
 
         let stage=0;
         let map=[];
@@ -75,7 +76,6 @@
             ],
 
         ]
-        //console.log("map="+map);
 
         const f1=(e) => {
             if (e.key === 'ArrowLeft') {
@@ -110,27 +110,17 @@
             }
         });
 
-    class Mov{
-        constructor(x, y, i,size, image_mov) {
+    class Mov{//モブ
+        constructor(x, y, i,size, image_mov,image_mov2) {
             this.id = i;
             this.x = x;
             this.y = y;
-            // this.x2=Math.floor(x/50)
-            // this.y2=Math.floor(y/50) 
             this.size=size
             this.image=image_mov
+            this.image2=image_mov2
             this.ct=0
             this.hp=100
         }
-        stoneCheck(xm,ym,Ss){//石があるかのチェック　３次受け
-                for (let S of Ss){
-                    let smx=S.x/50
-                    let smy=S.y/50
-                    if (smx==xm && smy==ym)
-                        return S.id
-                }
-                return -1
-            }        
 
         move(dx,dy){//上下左右への移動（updateの２次受け
                 let x1f=this.x+dx//1step先
@@ -145,14 +135,11 @@
                 if (map[stage][ym][xm]!=1)return
 
                 //石か    
-                let stoneId=this.stoneCheck(xm,ym,Ss)
-                if (stoneId >= 0){
+                if (objCheck(xm,ym,Ss) >= 0){
                     return
                 }  else if (x1f ==P1.x && y1f==P1.y){//人か
                     return
-                }  else if (x1f ==M1.x && y1f==M1.y){//モブか
-                    return     
-                } else{//なにもないところなので虫だけ進める
+                } else{//なにもないところなので進める
                     this.x=x1f;
                     this.y=y1f;
                 }
@@ -179,13 +166,19 @@
             }  //if(this.ct==10) 10フレームに１回だけ実行
         } //update                 
         draw(){    
-            if (this.hp>0){
+            if (this.hp>50){
                 ctx.drawImage(
                     this.image,
                     0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
                     this.x, this.y, 40, 40 // 描画する位置とサイズ (dx, dy, dw, dh)
                 );
-            }    
+            } else if (this.hp>0){
+                ctx.drawImage(
+                    this.image2,
+                    0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
+                    this.x, this.y, 40, 40 // 描画する位置とサイズ (dx, dy, dw, dh)
+                )
+            }   
         }    //draw(){
     }//class
 
@@ -208,7 +201,6 @@
             let oldfx=this.fx
             let oldfy=this.fy         
             let number = Math.floor(Math.random() * 4); // 0から100の間の整数       
-            //console.log(number)
             if (this.ff==true){
                 if (number==0){
                 this.fx-=50
@@ -277,13 +269,7 @@
             this.hp=50;
             this.status="live";//live,fixed,dead
         }
-        stoneCheck(x,y,Ss){//石があるかのチェック　３次受け
-                for (let S of Ss){
-                    if (S.x==x && S.y==y)
-                        return S.id
-                }
-                return -1
-            }
+
         move(dx,dy){//上下左右への移動（updateの２次受け
                 this.stopCt+=1;
                 let x1f=this.bx+dx//1step先
@@ -294,28 +280,30 @@
                 //野か
                 let xm=Math.floor(x1f/50)
                 let ym=Math.floor(y1f/50)
-                if (map[stage][ym][xm]!=1)
+                if (map[stage][ym][xm]!=1)//野以外か？
                     {this.hp -=1;return}
-                let stoneId=this.stoneCheck(x1f,y1f,Ss)
-                if (stoneId >= 0){
+                if (objCheck(x1f,y1f,Ss) >= 0){//石か
                     {this.hp -=1;return}
                 }  else if (x1f ==P1.x && y1f==P1.y){//人か
-                    {this.hp -=1;return}
-                }  else if (x1f ==M1.x && y1f==M1.y){//モブか
-                    {this.hp -=1;return}
-                // } else if (this.movCheck(x1f,y1f,Ms)==true){//モブか
-                //     return     
-                } else{//なにもないところなので虫だけ進める
-                    this.bx=x1f;
-                    this.by=y1f;
-                    this.hp=50;//動けたら復活する
-                }
+                    {this.hp -=1;return}}
+                //モブのチェック    
+                let movId=objCheck(x1f,y1f,Ms)
+                if (movId>=0){//モブか
+                    console.log("@283 movId="+movId)
+                    console.log("@284 Ms[movId].hp="+Ms[movId].hp)
+                    Ms[movId].hp-=50
+                    return     
+                } 
+                //なにもないところなので虫だけ進める
+                this.bx=x1f;
+                this.by=y1f;
+                this.hp=50;//動けたら復活する
+                
             }//move
         update(M){
             this.ct+=1//カウンタ　10fpsに1回だけ更新用
             if (this.ct==10){
                 this.ct=0
-                //console.log("id="+this.id+"  this.stopCt="+this.stopCt);
                 //ランダムで上下左右に移動
                 let number = Math.floor(Math.random() * 4); // 0から3の間の整数で方向を決める      
                 if (number==0){//左
@@ -347,6 +335,18 @@
         };
     }    
 
+
+    const objCheck=(x,y,Os)=>{//オブジェ奥とがあるかのチェック　３次受け
+        //あるならそのid番号、なければ-1
+            let idx=0;
+            for (let O of Os){
+                if (O.x==x && O.y==y)
+                    return idx
+                idx+=1;
+            }
+            return -1
+        }
+
     class Player {
         constructor(x, y, size, image) {
             this.x = x;
@@ -369,13 +369,7 @@
             }
             return false
         }
-        stoneCheck(x,y,Ss){//石があるかのチェック　３次受け
-            for (let S of Ss){
-                if (S.x==x && S.y==y)
-                    return S.id
-            }
-            return -1
-        }
+
         move(dx,dy){//上下左右への移動（updateの２次受け
             let x1f=this.x+dx//1step先
             let y1f=this.y+dy
@@ -383,40 +377,37 @@
             let y2f=this.y+(dy*2)
             //枠外か
             if (x1f<0 || x1f >= 800 || y1f<0 || y1f >=600)return
-
             //野か
             let xm=Math.floor(x1f/50)
             let ym=Math.floor(y1f/50)
             if (map[stage][ym][xm]!=1)return
-
-            let stoneId=this.stoneCheck(x1f,y1f,Ss)
-            if (stoneId >= 0){//石か
-                //一歩先が石の場合、2歩先をチェック
-                //枠外か
+            let stoneId=objCheck(x1f,y1f,Ss)//一歩先が石かどうか
+            if (stoneId >= 0){//一歩先が石なら
+                //2歩先をチェックして枠外ならret
                 if (x2f<0 || x2f >= 800 || y2f<0 || y2f >=600)return
                 //野か
                 let x2m=Math.floor(x2f/50)
                 let y2m=Math.floor(y2f/50)
                 if (map[stage][y2m][x2m]!=1)return
-                if (this.stoneCheck(x2f,y2f,Ss) >= 0){//石か
-                    return
+
+                if (objCheck(x2f,y2f,Ss) >= 0){//2歩先が石か
+                        return
                 } else if (this.bugCheck(x2f,y2f,Bs)==true){//虫か
                     return 
-                } else if (x2f ==M1.x && y2f==M1.y){//モブか
+                } else if (objCheck(x2f,y2f,Ms)>=0){//モブか
                     return     
                 } else {//なにもないので石と人を進める
                     isRepeating = true;
                     this.x=x1f;//人を進める
                     this.y=y1f;
-                    Ss[stoneId].x=x2f;//石を進める
+                    console.log("@391 stoneId="+stoneId)
+                    Ss[stoneId].x=x2f;//１歩先に合った石を進める
                     Ss[stoneId].y=y2f;
                 }   
             } else if (this.bugCheck(x1f,y1f,Bs)==true){//虫か
                 return 
-            } else if (x1f ==M1.x && y1f==M1.y){//モブか
+            } else if (objCheck(x1f,y1f,Ms)>=0){//モブか
                 return     
-            // } else if (this.movCheck(x1f,y1f,Ms)==true){//モブか
-            //     return     
             } else{//なにもないところなので人だけ進める
                 isRepeating = true;
                 this.x=x1f;
@@ -467,9 +458,8 @@
         //インスタンス化
         const Images=[image2,image3,image5]
         Bk=new Back(Images)
-        P1=new Player(100,100,50,image)
-        F1=new Fune(600,450,50,image_hune1)
-        M1=new Mov(300,450,50,image_mov)
+        P1=new Player(100,100,50,image)//プレイヤ
+        F1=new Fune(600,450,50,image_hune1)//船
         Bs = [];//虫(複数)
         for (let i = 0; i < 3; i++) {
             const x = 200 + i * 100; // x座標を変化させる
@@ -484,9 +474,9 @@
         }
         Ms = [];//モブ（複数）
         for (let i = 0; i < 5; i++) {
-            const x = 250 + i * 50; // x座標を変化させる
-            const y = 150 +i*50;          // y座標は固定
-            Ms.push(new Mov(x, y, i, 50, image_mov));
+            const x = 250 + i*50;     // x座標を変化させる
+            const y = 150 + i*50;        // y座標は固定
+            Ms.push(new Mov(x, y, i, 50, image_mov,image_mov2));
         }
     }
 
@@ -494,38 +484,39 @@
     //main loop
     function draw_flame(){
         ctx.clearRect(0, 0, canvas.width, canvas.height); // 画面クリア
+        //更新と描画
         Bk.draw()
         for (const B of Bs) {//虫
             B.update(M1);
             B.draw();
         }
-        let survivingBs = Bs.filter(B => B.hp > 0);
-        Bs=survivingBs;
         F1.draw();//船
         P1.update(Ss,M1,Bs);//プレイや
         P1.draw();
         for (const S of Ss) {//石
             S.draw();
         }
-        // for (const M of Ms) {//モブ
-        //     M.update(P1);//mov
-        //     M.draw();//mov
-        // }        
-        //
-        if (Bs.length==0){
-            stage+=1;
-            if (stage==3){
+        for (const M of Ms) {//モブ
+            M.update(P1);//mov
+            M.draw();//mov
+        }        
+        //生き残りチェック
+        let survivingBs = Bs.filter(B => B.hp > 0);
+        Bs=survivingBs;
+        let survivingMs = Ms.filter(M => M.hp > 0);
+        Ms=survivingMs;
+ 
+        //終了チェック
+        if (Bs.length==0){ //ステージ終了チェック
+        stage+=1;
+            if (stage==3){//ゲーム全体の終了チェック
                 return
             }
-            insta();
+            insta();//ステージ初期化
         }
         requestAnimationFrame(draw_flame)
     };
 
-    // image.onload = function() {
-    // draw_flame();
-    // };
-        
 
     let imagesLoaded = 0;
     const images = [image, image2, image3, image_stone];
