@@ -9,7 +9,27 @@
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <script>
         const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext("2d");        
+
+        // //scaleの計算--------
+        let CWIDTH	= 800;//キャンバスのデフォルト幅
+        let CHEIGHT	= 600;//キャンバスのデフォルト高さ
+        w = window.innerWidth;//実際のWindowsのサイズ
+        h = window.innerHeight;
+        canvas.width = w;//canvasを実サイズに合わせる（デフォルトの800x600から変更）
+        canvas.height = h;
+        whr=w/h                 //縦横レシオ/
+        console.log("w="+w+"h="+h);
+        //デフォルトよりも縦長ならwを基準にSCALEを計算する、横長ならh基準
+        if (whr<CWIDTH/CHEIGHT){//デフォルトよりも縦長なら
+           SCALE = w / CWIDTH; //CWIDTH=800
+        } else {//デフォルトより横長ならh基準
+            SCALE = h / CHEIGHT;  //CHEIGHT=600
+        }
+        ctx.scale(SCALE,SCALE);
+
+
+
         const image = new Image();        image.src = "img/man1.png";
         const image2 =new Image();        image2.src="img/green.png";
         const image3 =new Image();        image3.src="img/sea.png";
