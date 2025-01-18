@@ -130,16 +130,28 @@
             }
         });
 
-    class Mov{//モブ
-        constructor(x, y, i,size, image_mov,image_mov2) {
+    class Creature{//生物基盤
+        constructor(x, y, i,size, image, hp) {
             this.id = i;
             this.x = x;
             this.y = y;
-            this.size=size
-            this.image=image_mov
+            this.image=image
+            this.hp=hp
+        }
+        draw(){
+            ctx.drawImage(
+                this.image,
+                0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
+                this.x, this.y, 80, 80 // 描画する位置とサイズ (dx, dy, dw, dh)
+            );              
+        } 
+    }
+
+    class Mov extends Creature{//モブ
+        constructor(x, y, i,size, image_mov,image_mov2) {
+            super(x, y, i,size,image_mov,100);
             this.image2=image_mov2
             this.ct=0
-            this.hp=100
         }
 
         move(dx,dy){//上下左右への移動（updateの２次受け
@@ -202,14 +214,11 @@
         }    //draw(){
     }//class
 
-    class Fune{
-        constructor(x, y, size, image_hune1) {
-            this.fx = x;
-            this.fy = y;
+    class Fune extends Creature{
+        constructor(x, y, size, image) {
+            super(x,y,1,size,image,100);
             this.fx2=Math.floor(x/50)
             this.fy2=Math.floor(y/50) 
-            this.size=size
-            this.image=image_hune1
             this.ff=true
             this.ff2=10
         }
@@ -218,82 +227,61 @@
                 this.ff=true
                 this.ff2=0
             };
-            let oldfx=this.fx
-            let oldfy=this.fy         
+            let oldfx=this.x
+            let oldfy=this.y         
             let number = Math.floor(Math.random() * 4); // 0から100の間の整数       
             if (this.ff==true){
                 if (number==0){
-                this.fx-=50
+                this.x-=50
                 }
                 if(number==1){
-                    this.fx=this.fx+50
+                    this.x=this.x+50
                 }
                 if (number==2){
-                    this.fy=this.fy-50
+                    this.y=this.y-50
                 }
                 if(number==3){
-                    this.fy=this.fy+50
+                    this.y=this.y+50
                 }
                 this.ff=false
                 
             };
             this.ff2+=1
-            if(this.fx>750){
-            this.fx=750
+            if(this.x>750){
+            this.x=750
             }     
-            if(this.fy>550){
-                this.fy=550
+            if(this.y>550){
+                this.y=550
             };
-            this.fx2=this.fx/50
-            this.fy2=this.fy/50 
+            this.fx2=this.x/50
+            this.fy2=this.y/50 
             if(map[stage][this.fy2][this.fx2]!==2){
-                this.fx=oldfx
-                this.fy=oldfy
+                this.x=oldfx
+                this.y=oldfy
             };
-            ctx.drawImage(
-                this.image,
-                0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
-                this.fx, this.fy, 100, 100// 描画する位置とサイズ (dx, dy, dw, dh)
-            );
         }
     }
 
-    class Stone {
+    class Stone extends Creature{
         constructor(x, y, i,size, image) {
-            this.id = i;
-            this.x = x;
-            this.y = y;
+            super(x,y,i,size,image,0)
             this.x2=x/50
             this.y2=y/50 
-            this.size=size
-            this.image=image
         }
-        draw(){
-            ctx.drawImage(
-                this.image,
-                0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
-                this.x, this.y, 80, 80 // 描画する位置とサイズ (dx, dy, dw, dh)
-            );              
-        } 
     }
 
-    class Bug {
-        constructor(x, y, id, size, image1, image2) {
-            this.bx = x;
-            this.by = y;
-            this.id=id;    
-            this.size=size
-            this.image1=image1
+    class Bug extends Creature{
+        constructor(x, y, id, size, image, image2) {
+            super(x,y,id,size,image,50);    
             this.image2=image2
             this.ct=0
-            this.hp=50;
             this.status="live";//live,fixed,dead
         }
 
         move(dx,dy){//上下左右への移動（updateの２次受け
                 this.stopCt+=1;
-                let x1f=this.bx+dx//1step先
-                let y1f=this.by+dy
+                let x1f=this.x+dx//1step先
+                let y1f=this.y+dy
                 //枠外か
                 if (x1f<0 || x1f >= 800 || y1f<0 || y1f >=600)
                    {return}
@@ -315,8 +303,8 @@
                     return     
                 } 
                 //なにもないところなので虫だけ進める
-                this.bx=x1f;
-                this.by=y1f;
+                this.x=x1f;
+                this.y=y1f;
                 this.hp=50;//動けたら復活する
                 
             }//move
@@ -342,14 +330,14 @@
         }                
         draw(){
             if (this.hp>=25){
-                ctx.drawImage(this.image1,
+                ctx.drawImage(this.image,
                 0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
-                this.bx, this.by, 80, 80 // 描画する位置とサイズ (dx, dy, dw, dh)
+                this.x, this.y, 80, 80 // 描画する位置とサイズ (dx, dy, dw, dh)
                 );
             } else {
                 ctx.drawImage(this.image2,
                 0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
-                this.bx, this.by, 80, 80 // 描画する位置とサイズ (dx, dy, dw, dh)
+                this.x, this.y, 80, 80 // 描画する位置とサイズ (dx, dy, dw, dh)
                 );
             }
         };
@@ -381,24 +369,14 @@
             return -1
         }
 
-    class Player {
+    class Player extends Creature{
         constructor(x, y, size, image) {
-            this.x = x;
-            this.y = y;
-            this.size=size
-            this.image=image
+            super(x,y,1,size,image,100);
             this.fps=0
-        }
-        draw(){
-            ctx.drawImage(
-                this.image,
-                0, 0, 100, 100, // 切り取る部分の (sx, sy, sw, sh)
-                this.x, this.y, 80, 80 // 描画する位置とサイズ (dx, dy, dw, dh)
-            );
         }
         bugCheck(x,y,Bs){//虫がいるかのチェック　３次受け
             for (let B of Bs){
-                if (B.bx==x && B.by==y)
+                if (B.x==x && B.y==y)
                     return true
             }
             return false
