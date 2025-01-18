@@ -1,0 +1,164 @@
+class BackGround{
+  constructor(){
+      this.mx = 0;
+      this.my = 0;
+      this.w = 50;
+      this.h = 50;
+      this.grass = new Image();
+      this.mt = new Image();
+      this.sea = new Image();
+      this.table = new Image();
+      this.grass.src = 'img/green.png';
+      this.mt.src = 'img/mount.png';
+      this.sea.src = 'img/sea.png';
+      this.tiles=[this.grass,this.mt,this.sea];
+      this.list = [["1","1","1","1","0","0","0","0","0","0","0","2","2","2","2","2"],
+                   ["1","1","1","0","0","0","0","0","0","0","0","0","2","2","2","2"],
+                   ["1","1","1","1","1","0","0","0","0","0","0","0","2","2","2","2"],
+                   ["1","1","1","1","1","0","0","0","0","0","0","0","2","2","2","2"],
+                   ["1","0","0","0","0","0","0","0","0","0","0","0","2","2","2","2"],
+                   ["1","0","0","1","0","0","0","0","0","0","0","0","2","2","2","2"],
+                   ["1","0","0","1","0","0","0","0","0","0","0","0","0","2","2","2"],
+                   ["1","0","0","1","0","0","0","0","0","0","0","0","0","2","2","2"],
+                   ["1","1","1","1","0","0","0","0","0","0","0","0","0","2","2","2"],
+                   ["1","1","1","0","0","0","0","0","0","0","0","0","2","2","2","2"],
+                   ["1","1","1","0","0","0","0","0","0","0","0","0","0","2","2","2"],
+                   ["1","1","0","0","0","0","0","0","0","0","0","0","0","2","2","2"],
+                   ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ];
+  }
+  draw(ctx){
+      for (  var i = 0;  i < 12;  i++ ) {
+          for (var j = 0; j < 16; j++) {
+              this.mapnum = parseInt(this.list[i][j]);
+              ctx.drawImage(this.tiles[this.mapnum], 0, 0, this.w, this.h, this.mx, this.my, this.w, this.h );
+              this.mx += 50;
+          }
+          this.mx = 0;
+          this.my += 50;
+      }
+      this.my = 0;
+  }
+}
+class Player{
+  constructor(){
+      this.px = 400;
+      this.py = 100;
+      this.w = 50;
+      this.h = 50;
+      this.ply = new Image();
+      this.ply.src = 'img/man1.png'
+  }
+  draw(ctx){
+      ctx.drawImage(this.ply, 0, 0, this.w, this.h, this.px, this.py, this.w, this.h );
+  }
+}
+class Enemy{
+  constructor(ex,ey){
+      this.ex = ex;
+      this.ey = ey;
+      this.w = 50;
+      this.h = 50;
+      this.tick = 0;
+      this.eny = new Image();
+      this.eny.src = 'img/bug1.png'
+  }
+  update(){
+      function getRandomInt(max) {
+          return Math.floor(Math.random() * max);
+      }
+      this.s = getRandomInt(4)
+      this.tick += 1
+      if (this.tick >= 10){
+          if (this.s == 0 && B.list[this.ey/50][this.ex/50+1] == '0'){
+              if (this.ex <= 700){
+                  this.ex += 50
+              }
+          }
+          if (this.s == 1 && B.list[this.ey/50][this.ex/50-1] == '0'){
+              if (this.ex >= 50){
+                  this.ex -= 50
+              }
+          }
+          if (this.s == 2 && B.list[this.ey/50+1][this.ex/50] == '0'){
+              if (this.ey <= 500){
+                  this.ey += 50
+              }
+          }
+          if (this.s == 3 && B.list[this.ey/50-1][this.ex/50] == '0'){
+              if (this.ey >= 50){
+                  this.ey -= 50
+              }
+          }
+          this.tick = 0;
+      }
+  }
+  draw(ctx){
+      ctx.drawImage(this.eny, 0, 0, this.w, this.h, this.ex, this.ey, this.w, this.h );
+  }
+}
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+function main() {
+  P = new Player();
+  B = new BackGround();
+  E1 = new Enemy(450,350);
+  window.addEventListener('keydown', function(event) {
+      console.log(P.px,P.py)
+      if (P.py/50-1>=0 && B.list[P.py/50-1][P.px/50] == '0'){
+          if (P.py >= 50){
+              if (event.key === 'ArrowUp') {
+                  P.py -= 50
+              }
+          }
+      }
+      if (P.py/50-1<=13 && B.list[P.py/50+1][P.px/50] == '0'){
+          if (P.py <= 500){
+              if (event.key === 'ArrowDown') {
+                  P.py += 50
+              }
+          }
+      }
+      if (P.px/50-1<=17 && B.list[P.py/50][P.px/50+1] == '0'){
+          if (P.px <= 700){
+              if  (event.key === 'ArrowRight') {
+                  P.px += 50
+              }
+          }
+      }
+      if (P.px/50-1>=0 && B.list[P.py/50][P.px/50-1] == '0'){
+          if (P.px >= 50){
+              if (event.key === 'ArrowLeft') {
+                  P.px -= 50
+              }
+          }
+      }
+  });
+  // -----------------------------
+  // アニメ処理
+  // -----------------------------
+  function draw() {
+      // 1. 画面のクリア
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height); // 背景を白
+      // 2. 図形の描画
+      ctx.fillStyle = 'rgb(10, 10, 10)';
+      ctx.beginPath();
+      ctx.fill();
+      B.draw(ctx);
+      P.draw(ctx);
+      E1.update();
+      E1.draw(ctx);
+      requestAnimationFrame(draw); // フレームごとに更新 while(繰り返し)とpygame.display.update(全体の描画)の中間みたいな感じ
+  }
+  draw();
+}
+main();
+
+
+
+
+
+
+
+
