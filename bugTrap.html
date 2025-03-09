@@ -9,14 +9,25 @@
   margin: 0;
   overflow: hidden; /* スクロール禁止 */
 }
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 
     </style>
 </head>
 <body>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <canvas id="gameCanvas2" width="400" height="300"></canvas>
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");        
+
+        const canvas2 = document.getElementById("gameCanvas2");
+        const ctx2 = canvas2.getContext("2d");
+
 
         // //scaleの計算--------
         let CWIDTH	= 800;//キャンバスのデフォルト幅
@@ -34,6 +45,17 @@
             SCALE = h / CHEIGHT;  //CHEIGHT=600
         }
         ctx.scale(SCALE,SCALE);
+
+
+
+        // 枠線のスタイルを設定
+        ctx2.strokeStyle = "red"; // 枠線の色
+        
+        // フォント設定
+        ctx2.font = "30px Arial";
+        ctx2.fillStyle = "blue"; // 文字の色
+
+        
 
         const image = new Image();        image.src = "img/man1.png";
         const image2 =new Image();        image2.src="img/green.png";
@@ -449,6 +471,61 @@
         }      
     }    
 
+
+
+    let ewns=4
+let ewns2=["右","左","下","上","無"]
+canvas2.addEventListener('mousedown', function(event) {
+    const x = event.offsetX;
+    const y = event.offsetY;
+    
+    console.log(`X: ${x}, Y: ${y}, ボタン: ${event.button}`);
+    
+    if(10<=x && x<=60 && 60<=y && y<=110){
+        ewns=1
+        movingLeft=true
+    }
+    if(110<=x && x<=160 && 60<=y && y<=110){
+        ewns=0
+        movingRight=true
+    }
+    if(60<=x && x<=110 && 10<=y && y<=60){
+        ewns=3
+        movingup=true
+    }
+    if(60<=x && x<=110 && 110<=y && y<=160){
+        ewns=2
+        movingdown=true
+    }
+    
+    // alert("hello"+x+" y="+y)
+});
+canvas2.addEventListener('mouseup', function(event) {
+    const x = event.offsetX;
+    const y = event.offsetY;
+    
+    console.log(`X: ${x}, Y: ${y}, ボタン: ${event.button}`);
+    
+    if(10<=x && x<=60 && 60<=y && y<=110){
+        ewns=1
+        movingLeft=false
+    }
+    if(110<=x && x<=160 && 60<=y && y<=110){
+        ewns=0
+        movingRight=false
+    }
+    if(60<=x && x<=110 && 10<=y && y<=60){
+        ewns=3
+        movingup=false
+    }
+    if(60<=x && x<=110 && 110<=y && y<=160){
+        ewns=2
+        movingdown=false
+    }
+    
+    // alert("hello"+x+" y="+y)
+});
+
     let Bk,P1,F1,M1,Bs=[],Ss=[],Ms=[];//グローバルインスタンス
 
     const insta=()=>{
@@ -481,6 +558,25 @@
     //main loop
     function draw_flame(){
         ctx.clearRect(0, 0, canvas.width, canvas.height); // 画面クリア
+        ctx2.clearRect(0, 0, canvas2.width, canvas.height); // 画面クリア
+
+            
+            ctx2.fillStyle = "blue"; // 文字の色
+            ctx2.strokeStyle = 'red';
+            ctx2.strokeRect(10, 60, 50, 50); // 枠線だけの四角
+            ctx2.fillText("左", 20, 100);
+            ctx2.strokeRect(110, 60, 50, 50); // 枠線だけの四角
+            ctx2.fillText("右", 120, 100);
+            ctx2.strokeRect(60, 10, 50, 50); // 枠線だけの四角
+            ctx2.fillText("上", 70, 40);
+            ctx2.strokeRect(60, 110, 50, 50); // 枠線だけの四角
+            ctx2.fillText("下", 70, 150);
+            ctx2.fillStyle = "green"; // 文字の色
+            ctx2.fillText(ewns2[ewns], 300, 100);
+
+            
+
+
         //更新と描画
         Bk.draw()
         for (const B of Bs) {//虫
